@@ -23,15 +23,18 @@ const getRange = (lastCursor?: number): Promise<RangeResult> => {
     });
 }
 
-let lastCursor: undefined|number = undefined;
-const getRangeWithCursor = async () => {
-    const result = await getRange(lastCursor)
-    lastCursor = result.lastCursor
-    return result.objects
+const getRangeWithCursor = () => {
+    let lastCursor: undefined|number = undefined;
+    const getResult = async () => {
+        const result = await getRange(lastCursor)
+        lastCursor = result.lastCursor
+        return result.objects
+    }
+    return getResult
 }
 async function* collect() {
-    let result = await getRangeWithCursor()
-    let buffer = getRangeWithCursor()
+    let result = await getRangeWithCursor()()
+    let buffer = getRangeWithCursor()()
     let index:number = 0
     while(true) {
         yield result[index]
@@ -42,7 +45,7 @@ async function* collect() {
             if(result.length === 0) {
                 break;
             }
-            buffer = getRangeWithCursor()
+            buffer = getRangeWithCursor()()
         }
     }
 }
